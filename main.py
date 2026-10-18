@@ -28,7 +28,7 @@ def brinel() -> float:
         diameter_imprint = float(input("Введенный вами диаметр не корректен. Введите корректное значение в мм. d = "))
 
 
-    hb = float(0.102 * 2 * load) / (pi * diameter_ind * (diameter_ind - (diameter_ind ** 2 - diameter_imprint ** 2) ** (1/2)))
+    hb = float(2 * load) / (pi * diameter_ind * (diameter_ind - (diameter_ind ** 2 - diameter_imprint ** 2) ** (1/2)))
 
     return hb
 
@@ -61,7 +61,7 @@ def vikers() -> float:
 
     medium_diag = (d1 + d2) / 2
 
-    hv = 0.1891 * (load / (pow(medium_diag, 2))) * 10
+    hv = 0.1891 * (load / (pow(medium_diag, 2)))
 
     return hv
 
@@ -74,40 +74,61 @@ while not metods_data(method):
 if method == "HB":
     result_hb = brinel()
 
-    if result_hb < 200:
-        result_hr = None
-    elif 200 < result_hb < 620:
+    # HB -> HR
+    if 200 <= result_hb <= 620:
         result_hr = 0.116 * result_hb - 13.2
     else:
         result_hr = None
 
+    # HB -> HK
     if result_hb < 300:
         result_hk = result_hb
-    elif 300 < result_hb < 650:
-        result_hk = result_hb + 0.000012 * pow(result_hb, 2)
+    elif 300 <= result_hb <= 650:
+        result_hk = result_hb + 0.000012 * result_hb**2
     else:
         result_hk = None
 
 
 elif method == "HR":
     result_hr = rokvel()
+
+    # HR -> HB и HK
     if 20 < result_hr < 67:
-        result_hb = -102.84 + 11.158 * result_hr - 0.05804 * pow(result_hr, 2)
-        result_hk = -140.94 + 12.297 * result_hr - 0.05286 * pow(result_hr, 2)
+        result_hb = (
+            -102.84
+            + 11.158 * result_hr
+            - 0.05804 * result_hr**2
+        )
+        result_hk = (
+            -140.94
+            + 12.297 * result_hr
+            - 0.05286 * result_hr**2
+        )
     else:
         result_hb = None
-        result_hK = None
+        result_hk = None
+
 
 elif method == "HV":
-    result_hk = vikers()
-    if 100 < result_hk < 300:
-        result_hb = result_hr
-    elif 300 < result_hk < 600:
-        result_hb = 0.93 * result_hk + 0.00007 * pow(result_hk, 2)
+    result_hv = vikers()
+
+    # HV -> HB
+    if 300 <= result_hv <= 600:
+        result_hb = (
+            0.93 * result_hv
+            + 0.00007 * result_hv**2
+        )
     else:
         result_hb = None
-    if 240 < result_hk < 900:
-        result_hr = -0.00000009 * pow(result_hk, 3) + 0.000104 * pow(result_hk, 2) + 0.0385 * result_hk - 12
+
+    # HV -> HR
+    if 240 <= result_hv <= 900:
+        result_hr = (
+            -0.00000009 * result_hv**3
+            + 0.000104 * result_hv**2
+            + 0.0385 * result_hv
+            - 12
+        )
     else:
         result_hr = None
 
